@@ -17,11 +17,30 @@ var CommentList = React.createClass({
 });
 
 var CommentForm = React.createClass({
+  
+  // when the user submits the form we should clear the form, submit a request
+  // to the server, and refresh the list of comments
+
+  // listen for the form's submit event and clear the form
+  handleSubmit: function(){
+    var author = this.refs.author.getDOMNode().value.trim();
+    var text = this.refs.text.getDOMNode().value.trim();
+    if(!text || !author){
+      return false;
+    }
+    // TODO
+    this.refs.author.getDOMNode().value = '';
+    this.refs.text.getDOMNode().value = '';
+    return false;  // prevent default behavior, can also use evt.preventDefault()
+  },
+
   render: function() {
     return (
-      <div className="commentForm">
-        Hello, world! I am a CommentForm.
-      </div>
+      <form className="commentForm" onSubmit={this.handleSubmit}>
+        <input type="text" placeholder="Your name" />
+        <input type="text" placeholder="Say something..." />
+        <input type="submit" value="Post" />
+      </form>
     );
   }
 });
@@ -33,3 +52,8 @@ var CommentForm = React.createClass({
 
 // When you're mapping you need to include a unique identifier as the key
 // 
+// Reach attaches event handlers to components using a camelCase naming
+// convention. We attach an onSumit handler to the form that clears the form
+// fields when the form is submitted with valid input. We always return false
+// from the event handler to prevent the browser's default action of submitting
+// the form

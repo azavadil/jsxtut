@@ -16,25 +16,59 @@
 // second argument
 
 
-var data = [
-  {author: "Elon Musk", text: "For my part, I will never give up and I mean never"},
-  {author: "Nick Wells", text: "Lasting takes discipline"}
 
-]
 
 
 var CommentBox = React.createClass({
+
+  loadCommentsFromServer: function(){
+    $.ajax({
+      url:this.props.url,
+      dataType: 'json',  // type you expect to get back
+      success: function(data){
+        this.setState({data:data});
+      }.bind(this),
+      error: function(xhr, status, err){
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  // getInitialState executes exactly once
+  // add an empty array as the inital state
+  getInitialState: function(){
+    return {data: []};
+  },
+
+  componentDidMount: function(){
+    this.loadCommentsFromServer();
+    setInterval(this.loadCommentsFromServer, this.props.pollInterval)
+  },
+
   render: function() {
     return (
       <div className="commentBox">
         <h1>Comments</h1>
-        <CommentList data={this.props.data} />
+        <CommentList data={this.state.data} />
         <CommentForm />
      </div>
     );
   }
 });
 React.renderComponent(
-  <CommentBox data={data} />,
+  <CommentBox url="comments.json" pollInterval={2000} />,
   document.getElementById('content')
 );
+
+
+// Note: Props are immutable: they are passed from the parent and are "owned"
+//       by the parent. To implement interactions, we introduce mutable state
+//       to the component. this.state is private to the component and can be
+//       changed by calling this.setState() [like model.save() with ORM]
+//       When the state is updated, the component re-renders itself.
+// 
+//       render() methods are written declaratively as functions of this.props
+//       and this.state
+// 
+// Note: componentDidMount is a method called automatically by React when a 
+//       component is rendered. The key to dynamic updates is the call to 
+//       this.setState(). 
